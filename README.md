@@ -8,6 +8,7 @@
   <img src="https://img.shields.io/badge/FAISS-Vector%20Search-blue" />
 </p>
 
+> DEMO LINK: >https://drive.google.com/file/d/1eh2d9qS15R9ascB7jpshCuQOzxBrZVA6/view?usp=sharing
 **BharatStudent** is a production-grade AI platform that empowers Indian students with two core capabilities:
 
 1. **Legal Rights RAG Assistant** — Upload UGC/AICTE regulation PDFs and ask natural-language questions. The AI returns precise, citation-backed answers with document source, page number, and legal section references.
