@@ -1,0 +1,46 @@
+services:
+  mongodb:
+    image: mongo:latest
+    container_name: bharatstudent-db
+    ports:
+      - "27017:27017"
+    volumes:
+      - mongo_data:/data/db
+    restart: unless-stopped
+
+  api:
+    build:
+      context: .
+      dockerfile: Dockerfile.api
+    container_name: bharatstudent-api
+    ports:
+      - "8000:8000"
+    depends_on:
+      - mongodb
+    volumes:
+      - ./data:/app/data
+      - ./faiss_indexes:/app/faiss_indexes
+    environment:
+      - MONGODB_URI=mongodb://bharatstudent-db:27017
+      # Use host.docker.internal to route to Ollama running on the host machine
+      - OLLAMA_BASE_URL=http://host.docker.internal:11434
+    extra_hosts:
+      - "host.docker.internal:host-gateway"
+    restart: unless-stopped
+
+  ui:
+    build:
+      context: .
+      dockerfile: Dockerfile.ui
+    container_name: bharatstudent-ui
+    ports:
+      - "8501:8501"
+    depends_on:
+      - api
+    environment:
+      - API_HOST=api
+      - API_PORT=8000
+    restart: unless-stopped
+
+volumes:
+  mongo_data:

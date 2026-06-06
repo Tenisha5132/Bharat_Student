@@ -1,0 +1,185 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Rights AI Assistant - BharatStudent</title>
+    <!-- Inter Font -->
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="styles.css">
+</head>
+<body>
+    <nav class="navbar">
+        <div class="container nav-container">
+            <a href="/" class="logo">
+                <span class="logo-icon">🎓</span>
+                <span class="logo-text">BharatStudent</span>
+            </a>
+            <div class="nav-links">
+                <a href="/#features">Features</a>
+                <a href="/#about">About</a>
+                <a href="/upload.html" class="btn btn-outline">Upload Doc</a>
+                <a href="/chat.html" class="btn btn-primary">Get Started</a>
+            </div>
+            <button class="mobile-menu-btn" id="mobile-menu-btn">
+                <span></span><span></span><span></span>
+            </button>
+        </div>
+    </nav>
+
+    <main class="chat-page">
+        <div class="container">
+            <div class="chat-container-main">
+                <div class="chat-header">
+                    <h2>⚖️ Legal Rights Assistant</h2>
+                    <div class="chat-header-status">
+                        <span class="status-dot"></span>
+                        <span>AI Engine Active</span>
+                    </div>
+                </div>
+                
+                <div class="chat-history" id="chat-history">
+                    <!-- Default Greeting -->
+                    <div class="message ai">
+                        <div class="message-content">
+                            <strong>Legal AI Advisor:</strong> Hello! I am your student rights assistant. Ask me anything about UGC/AICTE regulations, fee refund policies, anti-ragging guidelines, or college compliance.
+                        </div>
+                        <div class="message-time">Just now</div>
+                    </div>
+                </div>
+
+                <div class="chat-input-area">
+                    <form class="chat-form" id="chat-form">
+                        <input type="text" id="chat-input" class="chat-input" placeholder="Ask a question about student rights, refund rules..." required autocomplete="off">
+                        <button type="submit" class="btn btn-primary">Send</button>
+                    </form>
+                </div>
+            </div>
+        </div>
+    </main>
+
+    <footer class="footer">
+        <div class="container footer-container">
+            <div class="footer-brand">
+                <div class="logo">
+                    <span class="logo-icon">🎓</span>
+                    <span class="logo-text">BharatStudent</span>
+                </div>
+                <p>Digital empowerment for the youth of India.</p>
+            </div>
+            <div class="footer-links">
+                <div class="link-group">
+                    <h4>Platform</h4>
+                    <a href="/chat.html">AI Assistant</a>
+                    <a href="/search.html">College Directory</a>
+                    <a href="/upload.html">Document Check</a>
+                </div>
+                <div class="link-group">
+                    <h4>Resources</h4>
+                    <a href="#">UGC Guidelines</a>
+                    <a href="#">AICTE Rules</a>
+                    <a href="#">Student Helpline</a>
+                </div>
+            </div>
+        </div>
+        <div class="footer-bottom container">
+            <p>&copy; 2026 BharatStudent Project. AI-powered advisory platform.</p>
+        </div>
+    </footer>
+
+    <script src="app.js"></script>
+    <script>
+        document.addEventListener('DOMContentLoaded', () => {
+            const chatForm = document.getElementById('chat-form');
+            const chatInput = document.getElementById('chat-input');
+            const chatHistory = document.getElementById('chat-history');
+
+            chatForm.addEventListener('submit', async (e) => {
+                e.preventDefault();
+                const query = chatInput.value.trim();
+                if (!query) return;
+
+                // 1. Add User Message
+                addMessage(query, 'user');
+                chatInput.value = '';
+
+                // 2. Add Loading Indicator
+                const loadingMsg = addMessage('Thinking...', 'ai', true);
+
+                try {
+                    const response = await fetch('/api/chat', {
+                        method: 'POST',
+                        headers: {
+                            'Content-Type': 'application/json'
+                        },
+                        body: JSON.stringify({ query: query })
+                    });
+
+                    loadingMsg.remove();
+
+                    if (!response.ok) {
+                        const err = await response.json();
+                        addMessage(`Error: ${err.detail || 'Failed to get response'}`, 'ai');
+                        return;
+                    }
+
+                    const data = await response.json();
+                    
+                    // 3. Add AI Response & Citations
+                    addMessage(data.answer, 'ai', false, data.sources);
+
+                } catch (error) {
+                    loadingMsg.remove();
+                    addMessage(`Error connecting to server. Make sure FastAPI server is running.`, 'ai');
+                }
+            });
+
+            function addMessage(text, sender, isLoading = false, sources = []) {
+                const messageDiv = document.createElement('div');
+                messageDiv.className = `message ${sender}`;
+
+                const contentDiv = document.createElement('div');
+                contentDiv.className = 'message-content';
+
+                // Convert basic markdown/newlines to HTML linebreaks
+                let formattedText = text.replace(/\n/g, '<br>');
+                // Bold markdown formatter
+                formattedText = formattedText.replace(/\*\*(.*?)\*\*/g, '<strong>$1</strong>');
+                
+                contentDiv.innerHTML = sender === 'ai' ? `<strong>Legal AI Advisor:</strong> ${formattedText}` : formattedText;
+
+                // Append citations if available
+                if (sources && sources.length > 0) {
+                    const citationsDiv = document.createElement('div');
+                    citationsDiv.className = 'citations-container';
+                    citationsDiv.innerHTML = '<div class="citations-title">Citations:</div>';
+                    
+                    sources.forEach(src => {
+                        const item = document.createElement('div');
+                        item.className = 'citation-item';
+                        item.innerHTML = `📚 <em>${src.source}</em> (Page ${src.page}, Section: ${src.legal_section})`;
+                        citationsDiv.appendChild(item);
+                    });
+                    
+                    contentDiv.appendChild(citationsDiv);
+                }
+
+                messageDiv.appendChild(contentDiv);
+
+                const timeDiv = document.createElement('div');
+                timeDiv.className = 'message-time';
+                const now = new Date();
+                timeDiv.textContent = now.toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' });
+                messageDiv.appendChild(timeDiv);
+
+                chatHistory.appendChild(messageDiv);
+                chatHistory.scrollTop = chatHistory.scrollHeight;
+
+                return messageDiv;
+            }
+        });
+    </script>
+</body>
+</html>

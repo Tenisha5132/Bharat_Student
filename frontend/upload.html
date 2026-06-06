@@ -1,0 +1,224 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Ingest Regulations - BharatStudent</title>
+    <!-- Inter Font -->
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="styles.css">
+</head>
+<body>
+    <nav class="navbar">
+        <div class="container nav-container">
+            <a href="/" class="logo">
+                <span class="logo-icon">🎓</span>
+                <span class="logo-text">BharatStudent</span>
+            </a>
+            <div class="nav-links">
+                <a href="/#features">Features</a>
+                <a href="/#about">About</a>
+                <a href="/upload.html" class="btn btn-outline">Upload Doc</a>
+                <a href="/chat.html" class="btn btn-primary">Get Started</a>
+            </div>
+            <button class="mobile-menu-btn" id="mobile-menu-btn">
+                <span></span><span></span><span></span>
+            </button>
+        </div>
+    </nav>
+
+    <main class="upload-page">
+        <div class="container">
+            <div class="upload-container-main">
+                <div class="upload-header">
+                    <h2>📄 Ingest Regulation Documents</h2>
+                    <p>Upload UGC, AICTE, or university handbook PDFs to update the AI's legal knowledge base.</p>
+                </div>
+
+                <div class="drag-area" id="drag-area">
+                    <span class="upload-icon">📥</span>
+                    <h3>Drag & Drop PDF here</h3>
+                    <p>or click to browse from files</p>
+                    <input type="file" id="file-input" accept=".pdf" style="display: none;">
+                </div>
+
+                <div class="file-info" id="file-info">
+                    <div class="file-details">
+                        <span class="file-icon">📄</span>
+                        <div>
+                            <span class="file-name" id="file-name">filename.pdf</span>
+                            <span class="file-size" id="file-size">0 KB</span>
+                        </div>
+                    </div>
+                    <button class="remove-file" id="remove-file">&times;</button>
+                </div>
+
+                <button class="btn btn-primary btn-large" id="submit-upload" style="width: 100%; display: none;">
+                    Ingest into Knowledge Base
+                </button>
+
+                <div class="status-message" id="status-message"></div>
+            </div>
+        </div>
+    </main>
+
+    <footer class="footer">
+        <div class="container footer-container">
+            <div class="footer-brand">
+                <div class="logo">
+                    <span class="logo-icon">🎓</span>
+                    <span class="logo-text">BharatStudent</span>
+                </div>
+                <p>Digital empowerment for the youth of India.</p>
+            </div>
+            <div class="footer-links">
+                <div class="link-group">
+                    <h4>Platform</h4>
+                    <a href="/chat.html">AI Assistant</a>
+                    <a href="/search.html">College Directory</a>
+                    <a href="/upload.html">Document Check</a>
+                </div>
+                <div class="link-group">
+                    <h4>Resources</h4>
+                    <a href="#">UGC Guidelines</a>
+                    <a href="#">AICTE Rules</a>
+                    <a href="#">Student Helpline</a>
+                </div>
+            </div>
+        </div>
+        <div class="footer-bottom container">
+            <p>&copy; 2026 BharatStudent Project. AI-powered advisory platform.</p>
+        </div>
+    </footer>
+
+    <script src="app.js"></script>
+    <script>
+        document.addEventListener('DOMContentLoaded', () => {
+            const dragArea = document.getElementById('drag-area');
+            const fileInput = document.getElementById('file-input');
+            const fileInfo = document.getElementById('file-info');
+            const fileNameSpan = document.getElementById('file-name');
+            const fileSizeSpan = document.getElementById('file-size');
+            const removeFileBtn = document.getElementById('remove-file');
+            const submitBtn = document.getElementById('submit-upload');
+            const statusMessage = document.getElementById('status-message');
+
+            let selectedFile = null;
+
+            // Trigger browse
+            dragArea.addEventListener('click', () => fileInput.click());
+
+            // Handle file selection
+            fileInput.addEventListener('change', (e) => {
+                if (e.target.files.length > 0) {
+                    handleFileSelection(e.target.files[0]);
+                }
+            });
+
+            // Drag and drop events
+            dragArea.addEventListener('dragover', (e) => {
+                e.preventDefault();
+                dragArea.classList.add('active');
+            });
+
+            dragArea.addEventListener('dragleave', () => {
+                dragArea.classList.remove('active');
+            });
+
+            dragArea.addEventListener('drop', (e) => {
+                e.preventDefault();
+                dragArea.classList.remove('active');
+                if (e.dataTransfer.files.length > 0) {
+                    handleFileSelection(e.dataTransfer.files[0]);
+                }
+            });
+
+            function handleFileSelection(file) {
+                if (file.type !== 'application/pdf') {
+                    showStatus('Only PDF files are supported.', 'error');
+                    return;
+                }
+
+                selectedFile = file;
+                fileNameSpan.textContent = file.name;
+                fileSizeSpan.textContent = formatBytes(file.size);
+                
+                dragArea.style.display = 'none';
+                fileInfo.style.display = 'flex';
+                submitBtn.style.display = 'block';
+                statusMessage.style.display = 'none';
+            }
+
+            // Remove file
+            removeFileBtn.addEventListener('click', () => {
+                selectedFile = null;
+                fileInput.value = '';
+                dragArea.style.display = 'block';
+                fileInfo.style.display = 'none';
+                submitBtn.style.display = 'none';
+                statusMessage.style.display = 'none';
+            });
+
+            // Submit upload
+            submitBtn.addEventListener('click', async () => {
+                if (!selectedFile) return;
+
+                const formData = new FormData();
+                formData.append('file', selectedFile);
+
+                submitBtn.disabled = true;
+                submitBtn.innerHTML = '<span class="spinner"></span> Ingesting...';
+                statusMessage.style.display = 'none';
+
+                try {
+                    const response = await fetch('/api/upload', {
+                        method: 'POST',
+                        body: formData
+                    });
+
+                    if (!response.ok) {
+                        const err = await response.json();
+                        throw new Error(err.detail || 'Ingestion failed');
+                    }
+
+                    const data = await response.json();
+                    showStatus(`🎉 ${data.message || 'Ingestion successful!'}`, 'success');
+                    
+                    // Reset UI
+                    selectedFile = null;
+                    fileInput.value = '';
+                    setTimeout(() => {
+                        dragArea.style.display = 'block';
+                        fileInfo.style.display = 'none';
+                        submitBtn.style.display = 'none';
+                        submitBtn.disabled = false;
+                        submitBtn.textContent = 'Ingest into Knowledge Base';
+                    }, 4000);
+
+                } catch (error) {
+                    showStatus(`Error: ${error.message}`, 'error');
+                    submitBtn.disabled = false;
+                    submitBtn.textContent = 'Ingest into Knowledge Base';
+                }
+            });
+
+            function showStatus(text, type) {
+                statusMessage.className = `status-message ${type}`;
+                statusMessage.textContent = text;
+                statusMessage.style.display = 'block';
+            }
+
+            function formatBytes(bytes, decimals = 2) {
+                if (bytes === 0) return '0 Bytes';
+                const k = 1024;
+                const dm = decimals < 0 ? 0 : decimals;
+                const sizes = ['Bytes', 'KB', 'MB', 'GB'];
+                const i = Math.floor(Math.log(bytes) / Math.log(k));
+                return parseFloat((bytes / Math.pow(k, i)).toFixed(dm)) + ' ' + sizes[i];
+            }
+        });
+    </script>
+</body>
+</html>

@@ -1,0 +1,38 @@
+# Virtual environment
+.venv/
+venv/
+env/
+
+# Python
+__pycache__/
+*.pyc
+*.pyo
+*.egg-info/
+dist/
+build/
+
+# FAISS index (generated at runtime)
+faiss_indexes/central/index*
+faiss_indexes/central/*.faiss
+faiss_indexes/central/*.pkl
+
+# Uploaded PDFs (user data)
+data/uploaded_pdfs/*.pdf
+data/processed/
+
+# OS
+.DS_Store
+Thumbs.db
+
+# IDE
+.vscode/
+.idea/
+
+# Docker (kept for reference but not required)
+# Dockerfile.api
+# Dockerfile.ui
+
+# Misc
+*.log
+.env
+indian-student-guide/

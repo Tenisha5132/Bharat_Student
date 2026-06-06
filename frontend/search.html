@@ -1,0 +1,307 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>College Vetting Directory - BharatStudent</title>
+    <!-- Inter Font -->
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="styles.css">
+</head>
+<body>
+    <nav class="navbar">
+        <div class="container nav-container">
+            <a href="/" class="logo">
+                <span class="logo-icon">🎓</span>
+                <span class="logo-text">BharatStudent</span>
+            </a>
+            <div class="nav-links">
+                <a href="/#features">Features</a>
+                <a href="/#about">About</a>
+                <a href="/upload.html" class="btn btn-outline">Upload Doc</a>
+                <a href="/chat.html" class="btn btn-primary">Get Started</a>
+            </div>
+            <button class="mobile-menu-btn" id="mobile-menu-btn">
+                <span></span><span></span><span></span>
+            </button>
+        </div>
+    </nav>
+
+    <main class="search-page">
+        <div class="container">
+            <div class="search-section-header">
+                <h2>🏫 College Vetting Directory</h2>
+                <p>Search institutions to verify their regulatory status, fees, placement stats, and Trust Score.</p>
+            </div>
+
+            <div class="search-bar-container">
+                <form id="search-form" class="search-form-grid">
+                    <div class="search-input-group">
+                        <label for="search-query">College Name</label>
+                        <input type="text" id="search-query" class="search-input-field" placeholder="Search by name (e.g. Osmania, IIT...)">
+                    </div>
+                    <div class="search-input-group">
+                        <label for="search-state">State</label>
+                        <select id="search-state" class="search-input-field">
+                            <option value="">All States</option>
+                            <option value="Telangana">Telangana</option>
+                            <option value="Maharashtra">Maharashtra</option>
+                            <option value="Tamil Nadu">Tamil Nadu</option>
+                            <option value="Delhi">Delhi</option>
+                        </select>
+                    </div>
+                    <div class="search-input-group">
+                        <label for="search-type">Type</label>
+                        <select id="search-type" class="search-input-field">
+                            <option value="">All Types</option>
+                            <option value="Public">Public</option>
+                            <option value="Private">Private</option>
+                        </select>
+                    </div>
+                    <button type="submit" class="btn btn-primary">Search</button>
+                </form>
+            </div>
+
+            <div class="results-grid" id="results-grid">
+                <!-- Initial state will be seeded with default search -->
+            </div>
+        </div>
+    </main>
+
+    <!-- Report Modal -->
+    <div class="modal-overlay" id="report-modal">
+        <div class="modal-content-container">
+            <div class="modal-header">
+                <h2 id="modal-title">College Intelligence Report</h2>
+                <button class="modal-close-btn" id="modal-close-btn">&times;</button>
+            </div>
+            <div class="modal-body markdown-body" id="modal-body">
+                <!-- Dynamically loaded report content -->
+            </div>
+        </div>
+    </div>
+
+    <footer class="footer">
+        <div class="container footer-container">
+            <div class="footer-brand">
+                <div class="logo">
+                    <span class="logo-icon">🎓</span>
+                    <span class="logo-text">BharatStudent</span>
+                </div>
+                <p>Digital empowerment for the youth of India.</p>
+            </div>
+            <div class="footer-links">
+                <div class="link-group">
+                    <h4>Platform</h4>
+                    <a href="/chat.html">AI Assistant</a>
+                    <a href="/search.html">College Directory</a>
+                    <a href="/upload.html">Document Check</a>
+                </div>
+                <div class="link-group">
+                    <h4>Resources</h4>
+                    <a href="#">UGC Guidelines</a>
+                    <a href="#">AICTE Rules</a>
+                    <a href="#">Student Helpline</a>
+                </div>
+            </div>
+        </div>
+        <div class="footer-bottom container">
+            <p>&copy; 2026 BharatStudent Project. AI-powered advisory platform.</p>
+        </div>
+    </footer>
+
+    <script src="app.js"></script>
+    <script>
+        document.addEventListener('DOMContentLoaded', () => {
+            const searchForm = document.getElementById('search-form');
+            const searchField = document.getElementById('search-query');
+            const stateField = document.getElementById('search-state');
+            const typeField = document.getElementById('search-type');
+            const resultsGrid = document.getElementById('results-grid');
+            
+            const modal = document.getElementById('report-modal');
+            const modalTitle = document.getElementById('modal-title');
+            const modalBody = document.getElementById('modal-body');
+            const modalClose = document.getElementById('modal-close-btn');
+
+            // Trigger initial search
+            fetchColleges();
+
+            searchForm.addEventListener('submit', (e) => {
+                e.preventDefault();
+                fetchColleges();
+            });
+
+            async function fetchColleges() {
+                resultsGrid.innerHTML = '<div style="grid-column: 1/-1; text-align: center; padding: 3rem;">Searching...</div>';
+                
+                const query = searchField.value.trim();
+                const state = stateField.value;
+                const type = typeField.value;
+
+                try {
+                    const response = await fetch('/api/college/search', {
+                        method: 'POST',
+                        headers: { 'Content-Type': 'application/json' },
+                        body: JSON.stringify({ query, state, type })
+                    });
+
+                    if (!response.ok) throw new Error('Search failed');
+
+                    const data = await response.json();
+                    renderResults(data.results);
+
+                } catch (error) {
+                    resultsGrid.innerHTML = `<div style="grid-column: 1/-1; text-align: center; color: var(--saffron-orange); padding: 3rem;">
+                        Failed to fetch colleges. Ensure the backend and MongoDB are running.
+                    </div>`;
+                }
+            }
+
+            function renderResults(results) {
+                if (!results || results.length === 0) {
+                    resultsGrid.innerHTML = '<div style="grid-column: 1/-1; text-align: center; padding: 3rem;">No colleges found. Try a different query.</div>';
+                    return;
+                }
+
+                resultsGrid.innerHTML = '';
+                results.forEach(col => {
+                    // Calculate quick features
+                    const ugcTag = col.regulatory.ugc_recognized ? '<span class="college-feature-tag approved">UGC Recognized</span>' : '<span class="college-feature-tag not-approved">No UGC</span>';
+                    const aicteTag = col.regulatory.aicte_approved ? '<span class="college-feature-tag approved">AICTE Approved</span>' : '<span class="college-feature-tag not-approved">No AICTE</span>';
+                    
+                    // Simple trust score mapping to classes
+                    // Trust score would normally be dynamically computed or stored. Here we can call the scoring logic or showcase it.
+                    // For the frontend result card, let's display NAAC & basic trust indicators
+                    let score = 5; // Default fallback
+                    if (col.regulatory.naac_grade === "A++") score = 9;
+                    else if (col.regulatory.naac_grade === "A+") score = 8;
+                    else if (col.regulatory.naac_grade === "A") score = 7;
+                    else if (col.regulatory.naac_grade === "B") score = 6;
+                    
+                    if (!col.regulatory.ugc_recognized || !col.regulatory.aicte_approved) {
+                        score -= 2;
+                    }
+                    if (col.red_flags.grievances > 10) {
+                        score -= 1;
+                    }
+
+                    // Constrain score
+                    score = Math.max(1, Math.min(10, score));
+
+                    let badgeClass = 'medium';
+                    if (score >= 8) badgeClass = 'high';
+                    else if (score <= 4) badgeClass = 'low';
+
+                    const card = document.createElement('div');
+                    card.className = 'result-card';
+                    card.innerHTML = `
+                        <div>
+                            <div class="result-card-header">
+                                <div>
+                                    <h3 class="college-name-title">${col.basic.name}</h3>
+                                    <div class="college-location-tag">📍 ${col.basic.city}, ${col.basic.state}</div>
+                                </div>
+                                <div class="trust-badge-container">
+                                    <div class="trust-score-badge ${badgeClass}">${score}/10</div>
+                                    <div class="trust-badge-label">TRUST SCORE</div>
+                                </div>
+                            </div>
+
+                            <div class="college-features-list">
+                                <span class="college-feature-tag">${col.basic.type}</span>
+                                <span class="college-feature-tag">${col.basic.university}</span>
+                                ${ugcTag}
+                                ${aicteTag}
+                            </div>
+                        </div>
+
+                        <div>
+                            <div class="college-stats-row">
+                                <div class="college-stat-item">
+                                    <span class="college-stat-value">₹${col.fees.annual_tuition.toLocaleString()}</span>
+                                    Tuition Fee/yr
+                                </div>
+                                <div class="college-stat-item">
+                                    <span class="college-stat-value">${col.placements.self_reported_percentage}%</span>
+                                    Placement Rate
+                                </div>
+                            </div>
+
+                            <button class="btn btn-outline" style="width: 100%;" onclick="viewReport('${encodeURIComponent(col.basic.name)}')">
+                                Generate Intelligence Report
+                            </button>
+                        </div>
+                    `;
+                    resultsGrid.appendChild(card);
+                });
+            }
+
+            // Expose viewReport globally
+            window.viewReport = async function(name) {
+                const collegeName = decodeURIComponent(name);
+                modalTitle.textContent = `${collegeName} - Intelligence Report`;
+                modalBody.innerHTML = '<div style="text-align: center; padding: 2rem;"><span class="spinner" style="border-top-color: var(--saffron-orange);"></span> Generating report...</div>';
+                modal.style.display = 'flex';
+
+                try {
+                    const response = await fetch(`/api/college/${name}`);
+                    if (!response.ok) throw new Error('Failed to generate report');
+
+                    const data = await response.json();
+                    
+                    // Simple Markdown to HTML formatter
+                    const htmlReport = formatMarkdown(data.report_markdown);
+                    modalBody.innerHTML = htmlReport;
+
+                } catch (error) {
+                    modalBody.innerHTML = `<div style="color: var(--saffron-orange); text-align: center; padding: 2rem;">
+                        Failed to generate report. Make sure local API and LLM/fallback services are online.
+                    </div>`;
+                }
+            }
+
+            modalClose.addEventListener('click', () => {
+                modal.style.display = 'none';
+            });
+
+            window.addEventListener('click', (e) => {
+                if (e.target === modal) {
+                    modal.style.display = 'none';
+                }
+            });
+
+            function formatMarkdown(markdown) {
+                if (!markdown) return '';
+                let html = markdown;
+
+                // Headers
+                html = html.replace(/^### (.*?)$/gm, '<h3>$1</h3>');
+                html = html.replace(/^## (.*?)$/gm, '<h2>$1</h2>');
+                html = html.replace(/^# (.*?)$/gm, '<h1>$1</h1>');
+
+                // Bold
+                html = html.replace(/\*\*(.*?)\*\*/g, '<strong>$1</strong>');
+
+                // Bullet points
+                html = html.replace(/^\* (.*?)$/gm, '<li>$1</li>');
+                html = html.replace(/^- (.*?)$/gm, '<li>$1</li>');
+
+                // Wrap lists
+                html = html.replace(/(<li>.*?<\/li>)/gs, '<ul>$1</ul>');
+                // Remove double list wrapping artifacts
+                html = html.replace(/<\/ul>\s*<ul>/g, '');
+
+                // Paragraphs
+                html = html.replace(/^(?!<h|<ul|<li)(.*?)$/gm, '<p>$1</p>');
+                // Remove empty paragraphs
+                html = html.replace(/<p><\/p>/g, '');
+
+                return html;
+            }
+        });
+    </script>
+</body>
+</html>

@@ -1,0 +1,55 @@
+[
+  {
+    "name": "IIT Bombay",
+    "location": "Mumbai, Maharashtra",
+    "established": 1958,
+    "nirf_ranking": 3,
+    "accreditations": [
+      {"body": "UGC", "status": "Approved", "grade": null},
+      {"body": "AICTE", "status": "Approved", "grade": null},
+      {"body": "NAAC", "status": "Accredited", "grade": "A++"}
+    ]
+  },
+  {
+    "name": "BITS Pilani",
+    "location": "Pilani, Rajasthan",
+    "established": 1964,
+    "nirf_ranking": 20,
+    "accreditations": [
+      {"body": "UGC", "status": "Approved", "grade": null},
+      {"body": "NAAC", "status": "Accredited", "grade": "A"}
+    ]
+  },
+  {
+    "name": "VIT Vellore",
+    "location": "Vellore, Tamil Nadu",
+    "established": 1984,
+    "nirf_ranking": 8,
+    "accreditations": [
+      {"body": "UGC", "status": "Approved", "grade": null},
+      {"body": "AICTE", "status": "Approved", "grade": null},
+      {"body": "NAAC", "status": "Accredited", "grade": "A++"}
+    ]
+  },
+  {
+    "name": "Delhi University",
+    "location": "New Delhi, Delhi",
+    "established": 1922,
+    "nirf_ranking": 11,
+    "accreditations": [
+      {"body": "UGC", "status": "Approved", "grade": null},
+      {"body": "NAAC", "status": "Accredited", "grade": "A+"}
+    ]
+  },
+  {
+    "name": "LPU",
+    "location": "Phagwara, Punjab",
+    "established": 2005,
+    "nirf_ranking": 38,
+    "accreditations": [
+      {"body": "UGC", "status": "Approved", "grade": null},
+      {"body": "AICTE", "status": "Approved", "grade": null},
+      {"body": "NAAC", "status": "Accredited", "grade": "A++"}
+    ]
+  }
+]
